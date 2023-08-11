@@ -1,0 +1,103 @@
+# Default values for conditions-number.
+# This is a YAML-formatted file.
+# Declare variables to be passed into your templates.
+
+replicaCount: 1
+
+image:
+  repository: ghcr.io/awakari/conditions-number
+  pullPolicy: Always
+  tag: "latest"
+imagePullSecrets:
+  - name: github-registry
+nameOverride: ""
+fullnameOverride: ""
+
+serviceAccount:
+  # Specifies whether a service account should be created
+  create: true
+  # Annotations to add to the service account
+  annotations: {}
+  # The name of the service account to use.
+  # If not set and create is true, a name is generated using the fullname template
+  name: ""
+
+podAnnotations: {}
+
+podSecurityContext: {}
+  # fsGroup: 2000
+
+securityContext: {}
+  # capabilities:
+  #   drop:
+  #   - ALL
+  # readOnlyRootFilesystem: true
+  # runAsNonRoot: true
+  # runAsUser: 1000
+
+service:
+  type: ClusterIP
+  port: 50051
+
+ingress:
+  enabled: false
+  className: ""
+  annotations: {}
+    # kubernetes.io/ingress.class: nginx
+    # kubernetes.io/tls-acme: "true"
+  hosts:
+    - host: conditions-number.local
+      paths:
+        - path: /
+          pathType: ImplementationSpecific
+  tls: []
+  #  - secretName: chart-example-tls
+  #    hosts:
+  #      - chart-example.local
+
+resources:
+  requests:
+    cpu: 1m
+    memory: 16Mi
+  limits:
+    cpu: 1000m
+    memory: 256Mi
+
+autoscaling:
+  enabled: true
+  minReplicas: 1
+  maxReplicas: 100
+  targetCPUUtilizationValue: 1000m
+  targetMemoryUtilizationValue: 128Mi
+
+nodeSelector: {}
+
+tolerations: []
+
+affinity: {}
+
+# Database related configuration.
+db:
+  protocol: mongodb
+  hostname: "mongodb:27017"
+  username: ""
+  password:
+    raw: "" # used if db.password.secret.enabled is false
+    secret:
+      enabled: false
+      name: "mongodb"
+      key: "mongodb-root-password"
+  # Database name to use.
+  name: conditions-number
+  table:
+    # Database table name to use.
+    name: conditions-number
+    lockTtl:
+      create: "1000s"
+    shard: true
+  tls:
+    enabled: false
+    insecure: false
+log:
+  # https://pkg.go.dev/golang.org/x/exp/slog#Level
+  level: -4

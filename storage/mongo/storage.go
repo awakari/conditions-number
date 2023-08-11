@@ -1,0 +1,352 @@
+package mongo
+
+import (
+	"context"
+	"crypto/tls"
+	"fmt"
+	"github.com/awakari/conditions-number/config"
+	"github.com/awakari/conditions-number/model"
+	"github.com/awakari/conditions-number/storage"
+	"go.mongodb.org/mongo-driver/bson"
+	"go.mongodb.org/mongo-driver/bson/primitive"
+	"go.mongodb.org/mongo-driver/mongo"
+	"go.mongodb.org/mongo-driver/mongo/options"
+	"time"
+)
+
+type storageImpl struct {
+	conn          *mongo.Client
+	db            *mongo.Database
+	coll          *mongo.Collection
+	createLockTtl time.Duration
+}
+
+var indices = []mongo.IndexModel{
+	// unique index
+	{
+		Keys: bson.D{
+			{
+				Key:   attrKey,
+				Value: 1,
+			},
+			{
+				Key:   attrOp,
+				Value: 1,
+			},
+			{
+				Key:   attrVal,
+				Value: 1,
+			},
+		},
+		Options: options.
+			Index().
+			SetUnique(true),
+	},
+}
+var projId = bson.D{
+	{
+		Key:   attrId,
+		Value: 1,
+	},
+}
+var optsSrvApi = options.ServerAPI(options.ServerAPIVersion1)
+var optsUpsert = options.
+	FindOneAndUpdate().
+	SetUpsert(true).
+	SetReturnDocument(options.After).
+	SetProjection(projId)
+var optsFind = options.
+	Find().
+	SetProjection(projId).
+	SetShowRecordID(false)
+var clauseCreateLockMissing = bson.M{
+	"$or": []bson.M{
+		{
+			attrCreateLockTime: bson.M{
+				"$exists": false,
+			},
+		},
+		{
+			attrCreateLockCount: bson.M{
+				"$lt": 1,
+			},
+		},
+	},
+}
+
+func NewStorage(ctx context.Context, cfgDb config.DbConfig) (s storage.Storage, err error) {
+	clientOpts := options.
+		Client().
+		ApplyURI(cfgDb.Uri).
+		SetServerAPIOptions(optsSrvApi)
+	if cfgDb.Tls.Enabled {
+		clientOpts = clientOpts.SetTLSConfig(&tls.Config{InsecureSkipVerify: cfgDb.Tls.Insecure})
+	}
+	if len(cfgDb.UserName) > 0 {
+		auth := options.Credential{
+			Username:    cfgDb.UserName,
+			Password:    cfgDb.Password,
+			PasswordSet: len(cfgDb.Password) > 0,
+		}
+		clientOpts = clientOpts.SetAuth(auth)
+	}
+	conn, err := mongo.Connect(ctx, clientOpts)
+	var stor storageImpl
+	if err == nil {
+		db := conn.Database(cfgDb.Name)
+		coll := db.Collection(cfgDb.Table.Name)
+		stor.conn = conn
+		stor.db = db
+		stor.coll = coll
+		stor.createLockTtl = cfgDb.Table.LockTtl.Create
+		_, err = stor.ensureIndices(ctx)
+	}
+	if err == nil && cfgDb.Table.Shard {
+		err = stor.shardCollection(ctx)
+	}
+	if err == nil {
+		s = stor
+	}
+	return
+}
+
+func (s storageImpl) ensureIndices(ctx context.Context) ([]string, error) {
+	return s.coll.Indexes().CreateMany(ctx, indices)
+}
+
+func (s storageImpl) shardCollection(ctx context.Context) (err error) {
+	adminDb := s.conn.Database("admin")
+	cmd := bson.D{
+		{
+			Key:   "shardCollection",
+			Value: fmt.Sprintf("%s.%s", s.db.Name(), s.coll.Name()),
+		},
+		{
+			Key: "key",
+			Value: bson.D{
+				{
+					Key:   attrKey,
+					Value: 1,
+				},
+				{
+					Key:   attrOp,
+					Value: 1,
+				},
+				{
+					Key:   attrVal,
+					Value: "hashed",
+				},
+			},
+		},
+	}
+	err = adminDb.RunCommand(ctx, cmd).Err()
+	return
+}
+
+func (s storageImpl) Close() error {
+	return s.conn.Disconnect(context.TODO())
+}
+
+func (s storageImpl) Create(ctx context.Context, k string, o model.Op, v float64) (id string, err error) {
+	maxLockTime := time.Now().UTC().Add(-s.createLockTtl)
+	clauseCreateLockExpired := bson.M{
+		attrCreateLockTime: bson.M{
+			"$lt": maxLockTime,
+		},
+	}
+	q := bson.M{
+		attrKey: k,
+		attrOp:  o,
+		attrVal: v,
+		"$or": []bson.M{
+			clauseCreateLockExpired,
+			clauseCreateLockMissing,
+		},
+	}
+	u := bson.M{
+		"$set": bson.M{
+			attrKey: k,
+			attrOp:  o,
+			attrVal: v,
+		},
+	}
+	result := s.coll.FindOneAndUpdate(ctx, q, u, optsUpsert)
+	var rec condition
+	if err == nil {
+		err = result.Decode(&rec)
+	}
+	if err == nil {
+		id = rec.Id
+	}
+	err = decodeError(err)
+	return
+}
+
+func (s storageImpl) LockCreate(ctx context.Context, id string) (err error) {
+	var oid primitive.ObjectID
+	oid, err = primitive.ObjectIDFromHex(id)
+	var result *mongo.UpdateResult
+	if err == nil {
+		u := bson.M{
+			"$set": bson.M{
+				attrCreateLockTime: time.Now().UTC(),
+			},
+			"$inc": bson.M{
+				attrCreateLockCount: 1,
+			},
+		}
+		result, err = s.coll.UpdateByID(ctx, oid, u)
+		err = decodeError(err)
+	}
+	if err == nil && result.MatchedCount < 1 {
+		err = fmt.Errorf("%w: id=%s", storage.ErrNotFound, id)
+	}
+	return
+}
+
+func (s storageImpl) UnlockCreate(ctx context.Context, id string) (err error) {
+	var oid primitive.ObjectID
+	oid, err = primitive.ObjectIDFromHex(id)
+	if err == nil {
+		q := bson.M{
+			attrId: oid,
+			attrCreateLockCount: bson.M{
+				"$gt": 0, // decrement if > 0, otherwise just skip
+			},
+		}
+		u := bson.M{
+			"$inc": bson.M{
+				attrCreateLockCount: -1,
+			},
+		}
+		_, err = s.coll.UpdateOne(ctx, q, u)
+	}
+	err = decodeError(err)
+	return
+}
+
+func (s storageImpl) Delete(ctx context.Context, id string) (err error) {
+	var oid primitive.ObjectID
+	oid, err = primitive.ObjectIDFromHex(id)
+	if err == nil {
+		q := bson.M{
+			attrId: oid,
+		}
+		_, err = s.coll.DeleteOne(ctx, q)
+	}
+	err = decodeError(err)
+	return
+}
+
+func (s storageImpl) Search(ctx context.Context, k string, v float64, consumer func(id string) (err error)) (n uint64, err error) {
+	q := bson.M{
+		"$and": []bson.M{
+			{
+				"$or": []bson.M{
+					{
+						attrKey: "",
+					},
+					{
+						attrKey: k,
+					},
+				},
+			},
+			{
+				"$or": []bson.M{
+					{
+						"$and": []bson.M{
+							{
+								attrOp: model.OpGt,
+							},
+							{
+								attrVal: bson.M{
+									"$lt": v,
+								},
+							},
+						},
+					},
+					{
+						"$and": []bson.M{
+							{
+								attrOp: model.OpGte,
+							},
+							{
+								attrVal: bson.M{
+									"$lte": v,
+								},
+							},
+						},
+					},
+					{
+						"$and": []bson.M{
+							{
+								attrOp: model.OpEq,
+							},
+							{
+								attrVal: v,
+							},
+						},
+					},
+					{
+						"$and": []bson.M{
+							{
+								attrOp: model.OpLte,
+							},
+							{
+								attrVal: bson.M{
+									"$gte": v,
+								},
+							},
+						},
+					},
+					{
+						"$and": []bson.M{
+							{
+								attrOp: model.OpLt,
+							},
+							{
+								attrVal: bson.M{
+									"$gt": v,
+								},
+							},
+						},
+					},
+				},
+			},
+		},
+	}
+	n, err = s.search(ctx, q, consumer)
+	return
+}
+
+func (s storageImpl) search(ctx context.Context, q bson.M, consumer func(id string) (err error)) (n uint64, err error) {
+	var cur *mongo.Cursor
+	cur, err = s.coll.Find(ctx, q, optsFind)
+	if err == nil {
+		defer cur.Close(ctx)
+		for cur.Next(ctx) {
+			var rec condition
+			err = cur.Decode(&rec)
+			if err == nil {
+				err = consumer(rec.Id)
+			}
+			if err != nil {
+				break
+			}
+			n++
+		}
+	}
+	err = decodeError(err)
+	return
+}
+
+func decodeError(src error) (dst error) {
+	switch {
+	case src == nil:
+	case mongo.IsDuplicateKeyError(src):
+		dst = fmt.Errorf("%w: %s", storage.ErrConflict, src)
+	default:
+		dst = fmt.Errorf("%w: %s", storage.ErrInternal, src)
+	}
+	return
+}

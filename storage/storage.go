@@ -1,0 +1,23 @@
+package storage
+
+import (
+	"context"
+	"errors"
+	"github.com/awakari/conditions-number/model"
+	"io"
+)
+
+type Storage interface {
+	io.Closer
+	Create(ctx context.Context, k string, o model.Op, v float64) (id string, err error)
+	LockCreate(ctx context.Context, id string) (err error)
+	UnlockCreate(ctx context.Context, id string) (err error)
+	Delete(ctx context.Context, id string) (err error)
+	Search(ctx context.Context, k string, v float64, consumer func(id string) (err error)) (n uint64, err error)
+}
+
+var ErrInternal = errors.New("internal failure")
+
+var ErrConflict = errors.New("already exists")
+
+var ErrNotFound = errors.New("not found")

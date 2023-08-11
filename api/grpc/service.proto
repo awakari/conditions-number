@@ -1,0 +1,67 @@
+syntax = "proto3";
+
+package awakari.conditions.number;
+
+option go_package = "./api/grpc";
+
+service Service {
+
+  rpc Create(CreateRequest) returns (CreateResponse);
+
+  rpc LockCreate(LockCreateRequest) returns (LockCreateResponse);
+
+  rpc UnlockCreate(UnlockCreateRequest) returns (UnlockCreateResponse);
+
+  rpc Delete(DeleteRequest) returns (DeleteResponse);
+
+  rpc Search(SearchRequest) returns (stream SearchResponse);
+}
+
+message CreateRequest {
+  string key = 1;
+  Operation op = 2;
+  double val = 3;
+}
+
+enum Operation {
+  Undefined = 0;
+  Gt = 1;
+  Gte = 2;
+  Eq = 3;
+  Lte = 4;
+  Lt = 5;
+}
+
+message CreateResponse {
+  string id = 1;
+}
+
+message LockCreateRequest {
+  string id = 1;
+}
+
+message LockCreateResponse {
+}
+
+message UnlockCreateRequest {
+  string id = 1;
+}
+
+message UnlockCreateResponse {
+}
+
+message DeleteRequest {
+  string id = 1;
+}
+
+message DeleteResponse {
+}
+
+message SearchRequest {
+  string key = 1;
+  double val = 2;
+}
+
+message SearchResponse {
+  string id = 1;
+}

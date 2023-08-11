@@ -45,7 +45,7 @@ jobs:
           cd helm/package
           helm repo index .
           
-            - name: Google Cloud Auth
+      - name: Google Cloud Auth
         uses: 'google-github-actions/auth@v1'
         with:
           credentials_json: '${{ secrets.GKE_SA_KEY }}'

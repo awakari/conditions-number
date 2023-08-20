@@ -94,4 +94,4 @@ spec:
           whenUnsatisfiable: ScheduleAnyway
           labelSelector:
             matchLabels:
-              {{ include "conditions-number.selectorLabels" . }}
+              app.kubernetes.io/name: {{ include "conditions-number.name" . }}

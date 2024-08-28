@@ -78,15 +78,12 @@ affinity: {}
 
 # Database related configuration.
 db:
-  protocol: mongodb
-  hostname: "mongodb:27017"
-  username: ""
-  password:
-    raw: "" # used if db.password.secret.enabled is false
-    secret:
-      enabled: false
-      name: "mongodb"
-      key: "mongodb-root-password"
+  secret:
+    name: "db-mongo"
+    keys:
+      url: "url"
+      username: "username"
+      password: "password"
   # Database name to use.
   name: conditions-number
   table:

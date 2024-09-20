@@ -61,14 +61,19 @@ resources:
     memory: 16Mi
   limits:
     cpu: 1000m
-    memory: 256Mi
+    memory: 64Mi
 
 autoscaling:
   enabled: true
   minReplicas: 1
   maxReplicas: 100
   targetCPUUtilizationValue: 1000m
-  targetMemoryUtilizationValue: 128Mi
+  targetMemoryUtilizationValue: 64Mi
+
+priority:
+  class: "awk-critical"
+  value: 1000
+  preemptionPolicy: "PreemptLowerPriority"
 
 nodeSelector: {}
 

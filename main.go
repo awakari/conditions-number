@@ -2,11 +2,12 @@ package main
 
 import (
 	"context"
+	"fmt"
 	apiGrpc "github.com/awakari/conditions-number/api/grpc"
 	"github.com/awakari/conditions-number/config"
 	"github.com/awakari/conditions-number/service"
 	"github.com/awakari/conditions-number/storage/mongo"
-	"golang.org/x/exp/slog"
+	"log/slog"
 	"os"
 )
 
@@ -14,7 +15,7 @@ func main() {
 	//
 	cfg, err := config.NewConfigFromEnv()
 	if err != nil {
-		slog.Error("failed to load the config from env", err)
+		slog.Error(fmt.Sprintf("failed to load the config from env: %s", err))
 	}
 	opts := slog.HandlerOptions{
 		Level: slog.Level(cfg.Log.Level),

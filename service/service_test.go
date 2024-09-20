@@ -5,7 +5,7 @@ import (
 	"github.com/awakari/conditions-number/model"
 	"github.com/awakari/conditions-number/storage"
 	"github.com/stretchr/testify/assert"
-	"golang.org/x/exp/slog"
+	"log/slog"
 	"testing"
 )
 

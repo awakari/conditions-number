@@ -4,7 +4,7 @@ import (
 	"context"
 	"fmt"
 	"github.com/awakari/conditions-number/model"
-	"golang.org/x/exp/slog"
+	"log/slog"
 )
 
 type serviceLogging struct {

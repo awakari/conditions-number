@@ -72,8 +72,6 @@ autoscaling:
 
 priority:
   class: "awk-critical"
-  value: 1000
-  preemptionPolicy: "PreemptLowerPriority"
 
 nodeSelector: {}
 

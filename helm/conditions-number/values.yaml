@@ -66,9 +66,10 @@ resources:
 autoscaling:
   enabled: true
   minReplicas: 1
-  maxReplicas: 100
-  targetCPUUtilizationValue: 1000m
-  targetMemoryUtilizationValue: 64Mi
+  maxReplicas: 2
+  targetCPUUtilizationValue: 500m
+  targetMemoryUtilizationValue: 32Mi
+  targetResolverWorkQueueLength: 100
 
 priority:
   class: "awk-critical"
@@ -101,3 +102,8 @@ db:
 log:
   # https://pkg.go.dev/golang.org/x/exp/slog#Level
   level: -4
+resolver:
+  name: "resolver"
+  queue:
+    name: "resolver"
+    targetLength: 1000

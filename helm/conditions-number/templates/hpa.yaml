@@ -13,6 +13,19 @@ spec:
   minReplicas: {{ .Values.autoscaling.minReplicas }}
   maxReplicas: {{ .Values.autoscaling.maxReplicas }}
   metrics:
+    - type: Object
+      object:
+        describedObject:
+          kind: Service
+          name: "{{ .Values.resolver.name }}"
+        metric:
+          name: "awk_work_queue_length"
+          selector:
+            matchLabels:
+              name: "{{ .Values.resolver.queue.name }}"
+        target:
+          type: Value
+          value: "{{ .Values.resolver.queue.targetLength }}"
     {{- if .Values.autoscaling.targetCPUUtilizationValue }}
     - type: Resource
       resource:

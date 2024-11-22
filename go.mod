@@ -5,7 +5,7 @@ go 1.23
 require (
 	github.com/go-redis/cache/v9 v9.0.0
 	github.com/kelseyhightower/envconfig v1.4.0
-	github.com/redis/go-redis/v9 v9.0.0-rc.4
+	github.com/redis/go-redis/v9 v9.7.0
 	github.com/stretchr/testify v1.9.0
 	go.mongodb.org/mongo-driver v1.17.1
 	google.golang.org/grpc v1.68.0

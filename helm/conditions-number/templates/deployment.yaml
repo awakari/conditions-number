@@ -72,6 +72,8 @@ spec:
               value: "{{ .Values.cache.password }}"
             - name: CACHE_ENABLED
               value: "{{ .Values.cache.enabled }}"
+            - name: CACHE_OMIT_ATTRIBUTES
+              value: "{{ .Values.cache.omit.attributes }}"
           securityContext:
             {{- toYaml .Values.securityContext | nindent 12 }}
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"

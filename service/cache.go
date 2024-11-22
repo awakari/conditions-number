@@ -11,9 +11,10 @@ import (
 )
 
 type svcCache struct {
-	svc      Service
-	cache    *cache.Cache
-	cacheTtl time.Duration
+	svc          Service
+	cache        *cache.Cache
+	cacheTtl     time.Duration
+	omitAttrKeys map[string]bool
 }
 
 type cacheValueBytes struct {
@@ -24,11 +25,16 @@ const keySep = ":"
 const keyPrefixCondTxt = "conds" + keySep + "num"
 const valSep = ","
 
-func NewCache(svc Service, cache *cache.Cache, cacheTtl time.Duration) Service {
+func NewCache(svc Service, cache *cache.Cache, cacheTtl time.Duration, omitAttrKeys []string) Service {
+	omitAttrKeysSet := map[string]bool{}
+	for _, key := range omitAttrKeys {
+		omitAttrKeysSet[key] = true
+	}
 	return svcCache{
-		svc:      svc,
-		cache:    cache,
-		cacheTtl: cacheTtl,
+		svc:          svc,
+		cache:        cache,
+		cacheTtl:     cacheTtl,
+		omitAttrKeys: omitAttrKeysSet,
 	}
 }
 
@@ -58,7 +64,7 @@ func (sc svcCache) Search(ctx context.Context, k string, v float64, consumer fun
 }
 
 func (sc svcCache) SearchPage(ctx context.Context, key string, val float64, limit uint32, cursor string) (ids []string, err error) {
-	if val >= math.MinInt64 && val <= math.MaxInt64 && val == float64(int64(val)) {
+	if !sc.omitAttrKeys[key] && val >= math.MinInt64 && val <= math.MaxInt64 && val == float64(int64(val)) {
 		v := new(cacheValueBytes)
 		load := func(_ *cache.Item) (result any, err error) {
 			var loaded []string

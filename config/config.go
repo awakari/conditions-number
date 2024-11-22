@@ -24,6 +24,9 @@ type CacheConfig struct {
 	Ttl      time.Duration `envconfig:"CACHE_TTL" default:"1m" required:"true"`
 	Addr     string        `envconfig:"CACHE_ADDR" default:"cache-keydb:6379" required:"true"`
 	Password string        `envconfig:"CACHE_PASSWORD" required:"false"`
+	Omit     struct {
+		Attributes []string `envconfig:"CACHE_OMIT_ATTRIBUTES" default:""`
+	}
 }
 
 type DbConfig struct {

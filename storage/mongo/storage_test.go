@@ -41,7 +41,7 @@ func clear(ctx context.Context, t *testing.T, s storageImpl) {
 	require.Nil(t, s.Close())
 }
 
-func TestStorageImpl_Search(t *testing.T) {
+func TestStorageImpl_SearchPage(t *testing.T) {
 	//
 	collName := fmt.Sprintf("conditions-number-test-%d", time.Now().UnixMicro())
 	dbCfg := config.DbConfig{
@@ -69,80 +69,83 @@ func TestStorageImpl_Search(t *testing.T) {
 	require.Nil(t, err)
 	//
 	cases := map[string]struct {
-		key  string
-		val  float64
-		lang string
-		ids  []string
-		err  error
+		key    string
+		val    float64
+		limit  uint32
+		cursor string
+		ids    []string
+		err    error
 	}{
 		"salary = 3": {
-			key: "salary",
-			val: 3,
+			key:   "salary",
+			val:   3,
+			limit: 10,
 			ids: []string{
 				cond0,
 				cond2,
 			},
 		},
 		"salary = 3.1415926": {
-			key: "salary",
-			val: 3.1415926,
+			key:   "salary",
+			val:   3.1415926,
+			limit: 10,
 			ids: []string{
 				cond0,
 				cond1,
 			},
 		},
 		"salary = 2": {
-			key: "salary",
-			val: 2,
-			ids: []string{},
+			key:   "salary",
+			val:   2,
+			limit: 10,
+			ids:   []string{},
 		},
 		"salary = 2.8": {
-			key: "salary",
-			val: 2.8,
+			key:   "salary",
+			val:   2.8,
+			limit: 10,
 			ids: []string{
 				cond0,
 			},
 		},
 		"SourceId = 1000": {
-			key: "SourceId",
-			val: 1000,
-			ids: []string{},
+			key:   "SourceId",
+			val:   1000,
+			limit: 10,
+			ids:   []string{},
 		},
 		"price = 122.99": {
-			key: "price",
-			val: 122.99,
+			key:   "price",
+			val:   122.99,
+			limit: 10,
 			ids: []string{
 				cond4,
 				cond5,
 			},
 		},
 		"price = 123.00": {
-			key: "price",
-			val: 123.0,
+			key:   "price",
+			val:   123.0,
+			limit: 10,
 			ids: []string{
 				cond4,
 			},
 		},
 		"price = 123.99": {
-			key: "price",
-			val: 123.99,
-			ids: []string{},
+			key:   "price",
+			val:   123.99,
+			limit: 10,
+			ids:   []string{},
 		},
 	}
 	//
 	for k, c := range cases {
 		t.Run(k, func(t *testing.T) {
-			var subIds []string
-			consumer := func(subId string) (err error) {
-				subIds = append(subIds, subId)
-				return
-			}
-			var n uint64
-			n, err = s.Search(ctx, c.key, c.val, consumer)
-			assert.Equal(t, len(c.ids), int(n))
+			var ids []string
+			ids, err = s.SearchPage(ctx, c.key, c.val, c.limit, c.cursor)
+			assert.Equal(t, len(c.ids), len(ids))
 			assert.ErrorIs(t, err, c.err)
-			assert.Equal(t, len(subIds), int(n))
-			assert.ElementsMatch(t, c.ids, subIds)
+			assert.ElementsMatch(t, c.ids, ids)
 		})
 	}
 }

@@ -64,3 +64,15 @@ func (sm storageMock) Search(ctx context.Context, k string, v float64, consumer 
 	}
 	return
 }
+
+func (sm storageMock) SearchPage(ctx context.Context, key string, val float64, limit uint32, cursor string) (ids []string, err error) {
+	switch key {
+	case "fail":
+		err = ErrInternal
+	default:
+		for i := uint32(0); i < limit; i++ {
+			ids = append(ids, fmt.Sprintf("cond%d", i))
+		}
+	}
+	return
+}

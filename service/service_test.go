@@ -93,25 +93,28 @@ func TestService_Delete(t *testing.T) {
 	}
 }
 
-func TestService_Search(t *testing.T) {
+func TestService_SearchPage(t *testing.T) {
 	//
 	svc := NewService(storage.NewStorageMock())
 	svc = NewServiceLogging(svc, slog.Default())
 	cases := map[string]struct {
-		key string
-		val float64
-		n   uint64
-		err error
+		key   string
+		val   float64
+		limit uint32
+		n     int
+		err   error
 	}{
 		"ok1": {
-			key: "amount",
-			val: 1.23,
-			n:   3,
+			key:   "amount",
+			val:   1.23,
+			limit: 10,
+			n:     10,
 		},
 		"ok2": {
-			key: "power",
-			val: 2.34,
-			n:   3,
+			key:   "power",
+			val:   2.34,
+			limit: 3,
+			n:     3,
 		},
 		"fail": {
 			key: "fail",
@@ -122,14 +125,9 @@ func TestService_Search(t *testing.T) {
 	//
 	for k, c := range cases {
 		t.Run(k, func(t *testing.T) {
-			var subIds []string
-			consumer := func(subId string) (err error) {
-				subIds = append(subIds, subId)
-				return
-			}
-			n, err := svc.Search(context.TODO(), c.key, c.val, consumer)
-			assert.Equal(t, c.n, n)
-			assert.Equal(t, int(c.n), len(subIds))
+			var ids []string
+			ids, err := svc.SearchPage(context.TODO(), c.key, c.val, c.limit, "")
+			assert.Equal(t, c.n, len(ids))
 			assert.ErrorIs(t, err, c.err)
 		})
 	}

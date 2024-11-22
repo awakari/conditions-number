@@ -220,3 +220,51 @@ func TestClient_Search(t *testing.T) {
 		})
 	}
 }
+
+func TestClient_SearchPage(t *testing.T) {
+	//
+	addr := fmt.Sprintf("localhost:%d", port)
+	conn, err := grpc.NewClient(addr, grpc.WithTransportCredentials(insecure.NewCredentials()))
+	require.Nil(t, err)
+	client := NewServiceClient(conn)
+	//
+	cases := map[string]struct {
+		key   string
+		val   float64
+		limit uint32
+		ids   []string
+		err   error
+	}{
+		"ok": {
+			key:   "",
+			val:   42,
+			limit: 3,
+			ids: []string{
+				"cond0",
+				"cond1",
+				"cond2",
+			},
+		},
+		"fail": {
+			key:   "fail",
+			val:   42,
+			limit: 3,
+			err:   status.Error(codes.Internal, "internal failure"),
+		},
+	}
+	//
+	for k, c := range cases {
+		t.Run(k, func(t *testing.T) {
+			var resp *SearchPageResponse
+			resp, err = client.SearchPage(context.TODO(), &SearchPageRequest{
+				Key:   c.key,
+				Val:   c.val,
+				Limit: c.limit,
+			})
+			assert.ErrorIs(t, err, c.err)
+			if c.err == nil {
+				assert.Equal(t, len(c.ids), len(resp.Ids))
+			}
+		})
+	}
+}

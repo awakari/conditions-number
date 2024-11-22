@@ -14,7 +14,10 @@ service Service {
 
   rpc Delete(DeleteRequest) returns (DeleteResponse);
 
+  // deprecated
   rpc Search(SearchRequest) returns (stream SearchResponse);
+
+  rpc SearchPage(SearchPageRequest) returns (SearchPageResponse);
 }
 
 message CreateRequest {
@@ -64,4 +67,15 @@ message SearchRequest {
 
 message SearchResponse {
   string id = 1;
+}
+
+message SearchPageRequest {
+  string key = 1;
+  double val = 2;
+  uint32 limit = 3;
+  string cursor = 4;
+}
+
+message SearchPageResponse {
+  repeated string ids = 1;
 }

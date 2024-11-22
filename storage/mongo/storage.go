@@ -59,6 +59,10 @@ var optsFind = options.
 	Find().
 	SetProjection(projId).
 	SetShowRecordID(false)
+var optsFindPage = options.
+	Find().
+	SetProjection(projId).
+	SetSort(projId)
 var clauseCreateLockMissing = bson.M{
 	"$or": []bson.M{
 		{
@@ -239,8 +243,65 @@ func (s storageImpl) Delete(ctx context.Context, id string) (err error) {
 }
 
 func (s storageImpl) Search(ctx context.Context, k string, v float64, consumer func(id string) (err error)) (n uint64, err error) {
-	q := bson.M{
+	q := searchQuery(k, v, primitive.NilObjectID)
+	var cur *mongo.Cursor
+	cur, err = s.coll.Find(ctx, q, optsFind)
+	if err == nil {
+		defer cur.Close(ctx)
+		for cur.Next(ctx) {
+			var rec condition
+			err = cur.Decode(&rec)
+			if err == nil {
+				err = consumer(rec.Id)
+			}
+			if err != nil {
+				break
+			}
+			n++
+		}
+	}
+	err = decodeError(err)
+	return
+}
+
+func (s storageImpl) SearchPage(ctx context.Context, key string, val float64, limit uint32, cursor string) (ids []string, err error) {
+	var cursorObjId primitive.ObjectID
+	switch cursor {
+	case "":
+		cursorObjId = primitive.NilObjectID
+	default:
+		cursorObjId, err = primitive.ObjectIDFromHex(cursor)
+	}
+	var cur *mongo.Cursor
+	if err == nil {
+		q := searchQuery(key, val, cursorObjId)
+		cur, err = s.coll.Find(ctx, q, optsFindPage.SetLimit(int64(limit)))
+	}
+	if err == nil {
+		defer cur.Close(ctx)
+		for cur.Next(ctx) {
+			var rec condition
+			err = cur.Decode(&rec)
+			if err == nil {
+				ids = append(ids, rec.Id)
+			}
+			if err != nil {
+				break
+			}
+		}
+	}
+	err = decodeError(err)
+	return
+}
+
+func searchQuery(k string, v float64, cursor primitive.ObjectID) (q bson.M) {
+	return bson.M{
 		"$and": []bson.M{
+			{
+				attrId: bson.M{
+					"$gt": cursor,
+				},
+			},
 			{
 				"$or": []bson.M{
 					{
@@ -315,29 +376,6 @@ func (s storageImpl) Search(ctx context.Context, k string, v float64, consumer f
 			},
 		},
 	}
-	n, err = s.search(ctx, q, consumer)
-	return
-}
-
-func (s storageImpl) search(ctx context.Context, q bson.M, consumer func(id string) (err error)) (n uint64, err error) {
-	var cur *mongo.Cursor
-	cur, err = s.coll.Find(ctx, q, optsFind)
-	if err == nil {
-		defer cur.Close(ctx)
-		for cur.Next(ctx) {
-			var rec condition
-			err = cur.Decode(&rec)
-			if err == nil {
-				err = consumer(rec.Id)
-			}
-			if err != nil {
-				break
-			}
-			n++
-		}
-	}
-	err = decodeError(err)
-	return
 }
 
 func decodeError(src error) (dst error) {

@@ -107,3 +107,9 @@ resolver:
   queue:
     name: "resolver"
     targetLength: 1000
+cache:
+  enabled: true
+  local:
+    size: 1000000
+  ttl: "1m"
+  addr: "cache-keydb:6379"

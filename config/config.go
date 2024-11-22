@@ -9,10 +9,21 @@ type Config struct {
 	Api struct {
 		Port uint16 `envconfig:"API_PORT" default:"50051" required:"true"`
 	}
-	Db  DbConfig
-	Log struct {
+	Cache CacheConfig
+	Db    DbConfig
+	Log   struct {
 		Level int `envconfig:"LOG_LEVEL" default:"-4" required:"true"`
 	}
+}
+
+type CacheConfig struct {
+	Enabled bool `envconfig:"CACHE_ENABLED" default:"false" required:"true"`
+	Local   struct {
+		Size uint32 `envconfig:"CACHE_LOCAL_SIZE" default:"1000000" required:"true"`
+	}
+	Ttl      time.Duration `envconfig:"CACHE_TTL" default:"1m" required:"true"`
+	Addr     string        `envconfig:"CACHE_ADDR" default:"cache-keydb:6379" required:"true"`
+	Password string        `envconfig:"CACHE_PASSWORD" required:"false"`
 }
 
 type DbConfig struct {

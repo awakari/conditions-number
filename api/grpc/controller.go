@@ -77,6 +77,13 @@ func (c controller) Search(req *SearchRequest, stream Service_SearchServer) (err
 	return
 }
 
+func (c controller) SearchPage(ctx context.Context, req *SearchPageRequest) (resp *SearchPageResponse, err error) {
+	resp = &SearchPageResponse{}
+	resp.Ids, err = c.svc.SearchPage(ctx, req.Key, req.Val, req.Limit, req.Cursor)
+	err = encodeError(err)
+	return
+}
+
 func encodeError(src error) (dst error) {
 	switch {
 	case src == nil:

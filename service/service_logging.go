@@ -54,6 +54,13 @@ func (sl serviceLogging) Search(ctx context.Context, k string, v float64, consum
 	return
 }
 
+func (sl serviceLogging) SearchPage(ctx context.Context, k string, v float64, limit uint32, cursor string) (ids []string, err error) {
+	ids, err = sl.svc.SearchPage(ctx, k, v, limit, cursor)
+	ll := sl.logLevel(err)
+	sl.log.Log(ctx, ll, fmt.Sprintf("SearchPage(k=%s, v=%f, limit=%d, cursor=%s): n=%d, err=%s", k, v, limit, cursor, len(ids), err))
+	return
+}
+
 func (sl serviceLogging) logLevel(err error) (lvl slog.Level) {
 	switch err {
 	case nil:

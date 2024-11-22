@@ -55,10 +55,6 @@ var optsUpsert = options.
 	SetUpsert(true).
 	SetReturnDocument(options.After).
 	SetProjection(projId)
-var optsFind = options.
-	Find().
-	SetProjection(projId).
-	SetShowRecordID(false)
 var optsFindPage = options.
 	Find().
 	SetProjection(projId).
@@ -237,28 +233,6 @@ func (s storageImpl) Delete(ctx context.Context, id string) (err error) {
 			attrId: oid,
 		}
 		_, err = s.coll.DeleteOne(ctx, q)
-	}
-	err = decodeError(err)
-	return
-}
-
-func (s storageImpl) Search(ctx context.Context, k string, v float64, consumer func(id string) (err error)) (n uint64, err error) {
-	q := searchQuery(k, v, primitive.NilObjectID)
-	var cur *mongo.Cursor
-	cur, err = s.coll.Find(ctx, q, optsFind)
-	if err == nil {
-		defer cur.Close(ctx)
-		for cur.Next(ctx) {
-			var rec condition
-			err = cur.Decode(&rec)
-			if err == nil {
-				err = consumer(rec.Id)
-			}
-			if err != nil {
-				break
-			}
-			n++
-		}
 	}
 	err = decodeError(err)
 	return

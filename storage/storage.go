@@ -13,7 +13,6 @@ type Storage interface {
 	LockCreate(ctx context.Context, id string) (err error)
 	UnlockCreate(ctx context.Context, id string) (err error)
 	Delete(ctx context.Context, id string) (err error)
-	Search(ctx context.Context, k string, v float64, consumer func(id string) (err error)) (n uint64, err error)
 	SearchPage(ctx context.Context, key string, val float64, limit uint32, cursor string) (ids []string, err error)
 }
 

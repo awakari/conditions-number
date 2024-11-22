@@ -47,13 +47,6 @@ func (sl serviceLogging) Delete(ctx context.Context, id string) (err error) {
 	return
 }
 
-func (sl serviceLogging) Search(ctx context.Context, k string, v float64, consumer func(id string) (err error)) (n uint64, err error) {
-	n, err = sl.svc.Search(ctx, k, v, consumer)
-	ll := sl.logLevel(err)
-	sl.log.Log(ctx, ll, fmt.Sprintf("Search(k=%s, v=%f): n=%d, err=%s", k, v, n, err))
-	return
-}
-
 func (sl serviceLogging) SearchPage(ctx context.Context, k string, v float64, limit uint32, cursor string) (ids []string, err error) {
 	ids, err = sl.svc.SearchPage(ctx, k, v, limit, cursor)
 	ll := sl.logLevel(err)

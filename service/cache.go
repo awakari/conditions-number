@@ -58,11 +58,6 @@ func (sc svcCache) Delete(ctx context.Context, id string) (err error) {
 	return
 }
 
-func (sc svcCache) Search(ctx context.Context, k string, v float64, consumer func(id string) (err error)) (n uint64, err error) {
-	n, err = sc.svc.Search(ctx, k, v, consumer)
-	return
-}
-
 func (sc svcCache) SearchPage(ctx context.Context, key string, val float64, limit uint32, cursor string) (ids []string, err error) {
 	if !sc.omitAttrKeys[key] && val >= math.MinInt64 && val <= math.MaxInt64 && val == float64(int64(val)) {
 		v := new(cacheValueBytes)

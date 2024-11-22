@@ -63,20 +63,6 @@ func (c controller) Delete(ctx context.Context, req *DeleteRequest) (resp *Delet
 	return
 }
 
-func (c controller) Search(req *SearchRequest, stream Service_SearchServer) (err error) {
-	ctx := stream.Context()
-	sendToStream := func(id string) (err error) {
-		resp := SearchResponse{
-			Id: id,
-		}
-		err = stream.Send(&resp)
-		return
-	}
-	_, err = c.svc.Search(ctx, req.Key, req.Val, sendToStream)
-	err = encodeError(err)
-	return
-}
-
 func (c controller) SearchPage(ctx context.Context, req *SearchPageRequest) (resp *SearchPageResponse, err error) {
 	resp = &SearchPageResponse{}
 	resp.Ids, err = c.svc.SearchPage(ctx, req.Key, req.Val, req.Limit, req.Cursor)

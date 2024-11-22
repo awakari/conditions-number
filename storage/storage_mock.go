@@ -49,22 +49,6 @@ func (sm storageMock) Delete(ctx context.Context, id string) (err error) {
 	return
 }
 
-func (sm storageMock) Search(ctx context.Context, k string, v float64, consumer func(idd string) (err error)) (n uint64, err error) {
-	switch k {
-	case "fail":
-		err = ErrInternal
-	default:
-		for i := 0; i < 3; i++ {
-			err = consumer(fmt.Sprintf("cond%d", i))
-			if err != nil {
-				break
-			}
-			n++
-		}
-	}
-	return
-}
-
 func (sm storageMock) SearchPage(ctx context.Context, key string, val float64, limit uint32, cursor string) (ids []string, err error) {
 	switch key {
 	case "fail":

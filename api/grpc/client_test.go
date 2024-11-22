@@ -11,7 +11,6 @@ import (
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/credentials/insecure"
 	"google.golang.org/grpc/status"
-	"io"
 	"log/slog"
 	"os"
 	"testing"
@@ -158,65 +157,6 @@ func TestClient_Delete(t *testing.T) {
 				Id: c.id,
 			})
 			assert.ErrorIs(t, err, c.err)
-		})
-	}
-}
-
-func TestClient_Search(t *testing.T) {
-	//
-	addr := fmt.Sprintf("localhost:%d", port)
-	conn, err := grpc.Dial(addr, grpc.WithTransportCredentials(insecure.NewCredentials()))
-	require.Nil(t, err)
-	client := NewServiceClient(conn)
-	//
-	cases := map[string]struct {
-		key string
-		val float64
-		ids []string
-		err error
-	}{
-		"ok": {
-			key: "",
-			val: 42,
-			ids: []string{
-				"cond0",
-				"cond1",
-				"cond2",
-			},
-		},
-		"fail": {
-			key: "fail",
-			val: 42,
-			err: status.Error(codes.Internal, "internal failure"),
-		},
-	}
-	//
-	for k, c := range cases {
-		t.Run(k, func(t *testing.T) {
-			var stream Service_SearchClient
-			stream, err = client.Search(context.TODO(), &SearchRequest{
-				Key: c.key,
-				Val: c.val,
-			})
-			assert.Nil(t, err)
-			var ids []string
-			var resp *SearchResponse
-			for {
-				resp, err = stream.Recv()
-				if err == io.EOF {
-					err = nil
-					break
-				}
-				if err != nil {
-					break
-				}
-				ids = append(ids, resp.Id)
-			}
-			assert.Equal(t, len(c.ids), len(ids))
-			assert.ElementsMatch(t, c.ids, ids)
-			assert.ErrorIs(t, err, c.err)
-			err = stream.CloseSend()
-			assert.Nil(t, err)
 		})
 	}
 }

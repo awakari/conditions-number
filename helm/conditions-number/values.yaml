@@ -114,4 +114,4 @@ cache:
   ttl: "24h"
   addr: "cache-keydb:6379"
   omit:
-    attributes: "awkpubtime,datemodified,datepublished,enddate,ends,nonce,published,revision,sequence,startdate,tgfileid,tgfileuniqueid,time,updated,xblockindex,xprevblockindex"
+    attributes: "awkpubtime,datemodified,datepublished,enddate,ends,nonce,published,revision,sequence,startdate,tgfileid,tgfileuniqueid,time,tradeid,updated,xblockindex,xprevblockindex"

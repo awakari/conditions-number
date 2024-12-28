@@ -21,7 +21,7 @@ type CacheConfig struct {
 	Local   struct {
 		Size uint32 `envconfig:"CACHE_LOCAL_SIZE" default:"1000000" required:"true"`
 	}
-	Ttl      time.Duration `envconfig:"CACHE_TTL" default:"1m" required:"true"`
+	Ttl      time.Duration `envconfig:"CACHE_TTL" default:"1h" required:"true"`
 	Addr     string        `envconfig:"CACHE_ADDR" default:"cache-keydb:6379" required:"true"`
 	Password string        `envconfig:"CACHE_PASSWORD" required:"false"`
 	Omit     struct {

@@ -111,7 +111,7 @@ cache:
   enabled: true
   local:
     size: "1000000"
-  ttl: "24h"
+  ttl: "1h"
   addr: "cache-keydb:6379"
   omit:
     attributes: "awkpubtime,datemodified,datepublished,enddate,ends,nonce,published,revision,sequence,startdate,tgfileid,tgfileuniqueid,time,tradeid,updated,xblockindex,xprevblockindex"

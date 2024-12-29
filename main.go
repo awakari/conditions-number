@@ -42,7 +42,7 @@ func main() {
 			Redis:      cacheClient,
 			LocalCache: cache.NewTinyLFU(int(cfg.Cache.Local.Size), cfg.Cache.Ttl),
 		})
-		svc = service.NewCache(svc, cacheSvc, cfg.Cache.Ttl, cfg.Cache.Omit.Attributes, cacheClient)
+		svc = service.NewCache(svc, cacheSvc, cfg.Cache.Ttl, cfg.Cache.Omit.Attributes)
 	}
 	//
 	log.Info("connected, starting to listen for incoming requests...")

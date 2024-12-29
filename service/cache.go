@@ -4,7 +4,6 @@ import (
 	"context"
 	"github.com/awakari/conditions-number/model"
 	"github.com/go-redis/cache/v9"
-	"github.com/redis/go-redis/v9"
 	"math"
 	"strconv"
 	"strings"
@@ -16,7 +15,6 @@ type svcCache struct {
 	cache        *cache.Cache
 	cacheTtl     time.Duration
 	omitAttrKeys map[string]bool
-	cacheClient  *redis.Client
 }
 
 type cacheValueBytes struct {
@@ -27,7 +25,7 @@ const keySep = ":"
 const keyPrefixCondNum = "conds" + keySep + "num"
 const valSep = ","
 
-func NewCache(svc Service, cache *cache.Cache, cacheTtl time.Duration, omitAttrKeys []string, cacheClient *redis.Client) Service {
+func NewCache(svc Service, cache *cache.Cache, cacheTtl time.Duration, omitAttrKeys []string) Service {
 	omitAttrKeysSet := map[string]bool{}
 	for _, key := range omitAttrKeys {
 		omitAttrKeysSet[key] = true
@@ -37,15 +35,11 @@ func NewCache(svc Service, cache *cache.Cache, cacheTtl time.Duration, omitAttrK
 		cache:        cache,
 		cacheTtl:     cacheTtl,
 		omitAttrKeys: omitAttrKeysSet,
-		cacheClient:  cacheClient,
 	}
 }
 
 func (sc svcCache) Create(ctx context.Context, k string, o model.Op, v float64) (id string, err error) {
 	id, err = sc.svc.Create(ctx, k, o, v)
-	if err == nil {
-		err = sc.clear(ctx)
-	}
 	return
 }
 
@@ -61,9 +55,6 @@ func (sc svcCache) UnlockCreate(ctx context.Context, id string) (err error) {
 
 func (sc svcCache) Delete(ctx context.Context, id string) (err error) {
 	err = sc.svc.Delete(ctx, id)
-	if err == nil {
-		err = sc.clear(ctx)
-	}
 	return
 }
 
@@ -99,26 +90,6 @@ func (sc svcCache) SearchPage(ctx context.Context, key string, val float64, limi
 		}
 	} else {
 		ids, err = sc.svc.SearchPage(ctx, key, val, limit, cursor)
-	}
-	return
-}
-
-func (sc svcCache) clear(ctx context.Context) (err error) {
-	var cursor uint64
-	for {
-		var keys []string
-		// SCAN for keys with the prefix
-		keys, cursor, err = sc.cacheClient.Scan(ctx, cursor, keyPrefixCondNum+keySep+"*", 10).Result()
-		if err == nil {
-			// Delete the matching keys
-			if len(keys) > 0 {
-				_, err = sc.cacheClient.Del(ctx, keys...).Result()
-			}
-		}
-		// Break if the cursor is 0 (end of scan)
-		if cursor == 0 || err != nil {
-			break
-		}
 	}
 	return
 }

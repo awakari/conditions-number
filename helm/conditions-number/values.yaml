@@ -83,7 +83,7 @@ affinity: {}
 # Database related configuration.
 db:
   secret:
-    name: "db-mongo"
+    name: "db-mongo-external-0"
     keys:
       url: "url"
       username: "username"

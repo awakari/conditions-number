@@ -110,7 +110,7 @@ resolver:
 cache:
   enabled: true
   local:
-    size: "1000000"
+    size: "10000"
   ttl: "1h"
   addr: "cache-keydb:6379"
   omit:

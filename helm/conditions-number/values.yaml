@@ -83,7 +83,7 @@ affinity: {}
 # Database related configuration.
 db:
   secret:
-    name: "db-mongo-external-0"
+    name: "db-mongo-internal-0"
     keys:
       url: "url"
       username: "username"
@@ -95,7 +95,7 @@ db:
     name: conditions-number
     lockTtl:
       create: "1000s"
-    shard: true
+    shard: false
   tls:
     enabled: false
     insecure: false
@@ -108,7 +108,7 @@ resolver:
     name: "resolver"
     targetLength: 1000
 cache:
-  enabled: true
+  enabled: false
   local:
     size: "10000"
   ttl: "1h"

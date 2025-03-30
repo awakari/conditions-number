@@ -27,7 +27,7 @@ func main() {
 	//
 	var stor storage.Storage
 	switch cfg.Db.Type {
-	case "mongodb":
+	case "mongo":
 		stor, err = mongo.NewStorage(context.TODO(), cfg.Db)
 	case "yugabyte":
 		stor, err = yugabyte.NewStorage(context.TODO(), cfg.Db)

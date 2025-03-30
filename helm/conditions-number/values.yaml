@@ -85,6 +85,7 @@ db:
   type: "mongo"
   port: "27017"
   secret:
+    enabled: true
     name: "db-mongo-internal-0"
     keys:
       url: "url"

@@ -17,9 +17,9 @@ type Config struct {
 
 type DbConfig struct {
 	Type     string `envconfig:"DB_TYPE" default:"mongo" required:"true"`
-	Uri      string `envconfig:"DB_URI" default:"mongodb://localhost:27017/?retryWrites=true&w=majority" required:"true"`
-	Host     string `envconfig:"DB_HOST" default:"127.0.0.1" required:"true"`
-	Port     uint16 `envconfig:"DB_PORT" default:"5433" required:"true"`
+	Uri      string `envconfig:"DB_URI" default:"mongodb://localhost:27017/?retryWrites=true&w=majority"`
+	Host     string `envconfig:"DB_HOST" default:"127.0.0.1"`
+	Port     uint16 `envconfig:"DB_PORT" default:"5433"`
 	Name     string `envconfig:"DB_NAME" default:"conditions-number" required:"true"`
 	UserName string `envconfig:"DB_USERNAME" default:""`
 	Password string `envconfig:"DB_PASSWORD" default:""`

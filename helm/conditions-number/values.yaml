@@ -82,6 +82,8 @@ affinity: {}
 
 # Database related configuration.
 db:
+  type: "mongo"
+  port: "27017"
   secret:
     name: "db-mongo-internal-0"
     keys:

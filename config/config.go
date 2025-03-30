@@ -9,28 +9,17 @@ type Config struct {
 	Api struct {
 		Port uint16 `envconfig:"API_PORT" default:"50051" required:"true"`
 	}
-	Cache CacheConfig
-	Db    DbConfig
-	Log   struct {
+	Db  DbConfig
+	Log struct {
 		Level int `envconfig:"LOG_LEVEL" default:"-4" required:"true"`
 	}
 }
 
-type CacheConfig struct {
-	Enabled bool `envconfig:"CACHE_ENABLED" default:"false" required:"true"`
-	Local   struct {
-		Size uint32 `envconfig:"CACHE_LOCAL_SIZE" default:"10000" required:"true"`
-	}
-	Ttl      time.Duration `envconfig:"CACHE_TTL" default:"1h" required:"true"`
-	Addr     string        `envconfig:"CACHE_ADDR" default:"cache-keydb:6379" required:"true"`
-	Password string        `envconfig:"CACHE_PASSWORD" required:"false"`
-	Omit     struct {
-		Attributes []string `envconfig:"CACHE_OMIT_ATTRIBUTES" default:""`
-	}
-}
-
 type DbConfig struct {
+	Type     string `envconfig:"DB_TYPE" default:"mongo" required:"true"`
 	Uri      string `envconfig:"DB_URI" default:"mongodb://localhost:27017/?retryWrites=true&w=majority" required:"true"`
+	Host     string `envconfig:"DB_HOST" default:"127.0.0.1" required:"true"`
+	Port     uint16 `envconfig:"DB_PORT" default:"5433" required:"true"`
 	Name     string `envconfig:"DB_NAME" default:"conditions-number" required:"true"`
 	UserName string `envconfig:"DB_USERNAME" default:""`
 	Password string `envconfig:"DB_PASSWORD" default:""`
@@ -44,6 +33,11 @@ type DbConfig struct {
 	Tls struct {
 		Enabled  bool `envconfig:"DB_TLS_ENABLED" default:"false" required:"true"`
 		Insecure bool `envconfig:"DB_TLS_INSECURE" default:"false" required:"true"`
+	}
+	Connection struct {
+		Count struct {
+			Max int32 `envconfig:"DB_CONNECTION_COUNT_MAX" default:"16" required:"true"`
+		}
 	}
 }
 

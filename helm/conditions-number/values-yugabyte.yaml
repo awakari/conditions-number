@@ -1,0 +1,14 @@
+db:
+  type: "yugabyte"
+  host: "yb-tservers"
+  username: "yugabyte"
+  password: "yugabyte"
+  port: "5433"
+  secret:
+    enabled: false
+  # Database name to use.
+  name: conditions_number
+  table:
+    # Database table name to use.
+    name: conditions_number
+    shard: true

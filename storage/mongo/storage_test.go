@@ -57,15 +57,15 @@ func TestStorageImpl_SearchPage(t *testing.T) {
 	require.Nil(t, err)
 	defer clear(ctx, t, s.(storageImpl))
 	//
-	cond0, err := s.Create(ctx, "salary", model.OpGt, 2.7182818)
+	cond0, err := s.Create(ctx, "interest1", "salary", model.OpGt, 2.7182818)
 	require.Nil(t, err)
-	cond1, err := s.Create(ctx, "salary", model.OpGte, 3.1415926)
+	cond1, err := s.Create(ctx, "interest1", "salary", model.OpGte, 3.1415926)
 	require.Nil(t, err)
-	cond2, err := s.Create(ctx, "salary", model.OpEq, 3)
+	cond2, err := s.Create(ctx, "interest1", "salary", model.OpEq, 3)
 	require.Nil(t, err)
-	cond4, err := s.Create(ctx, "price", model.OpLte, 123)
+	cond4, err := s.Create(ctx, "interest1", "price", model.OpLte, 123)
 	require.Nil(t, err)
-	cond5, err := s.Create(ctx, "price", model.OpLt, 123)
+	cond5, err := s.Create(ctx, "interest1", "price", model.OpLt, 123)
 	require.Nil(t, err)
 	//
 	cases := map[string]struct {
@@ -167,7 +167,7 @@ func TestStorageImpl_Create(t *testing.T) {
 	defer clear(ctx, t, s.(storageImpl))
 	//
 	var existingId string
-	existingId, err = s.Create(ctx, "price", model.OpEq, 42)
+	existingId, err = s.Create(ctx, "interest1", "price", model.OpEq, 42)
 	require.Nil(t, err)
 	//
 	cases := map[string]struct {
@@ -203,7 +203,7 @@ func TestStorageImpl_Create(t *testing.T) {
 	for k, c := range cases {
 		t.Run(k, func(t *testing.T) {
 			var id string
-			id, err = s.Create(ctx, c.key, c.op, c.val)
+			id, err = s.Create(ctx, "interest1", c.key, c.op, c.val)
 			if c.dup {
 				assert.Equal(t, existingId, id)
 			} else {
@@ -246,13 +246,13 @@ func TestStorageImpl_LockCreate(t *testing.T) {
 	for k, c := range cases {
 		t.Run(k, func(t *testing.T) {
 			var existingId string
-			existingId, err = s.Create(ctx, "key0", model.OpEq, 42)
+			existingId, err = s.Create(ctx, "interest1", "key0", model.OpEq, 42)
 			require.Nil(t, err)
 			err = s.LockCreate(ctx, existingId) // locks for 1 seconds
 			require.Nil(t, err)
 			time.Sleep(c.delay)
 			var id string
-			id, err = s.Create(ctx, "key0", model.OpEq, 42)
+			id, err = s.Create(ctx, "interest1", "key0", model.OpEq, 42)
 			if c.err == nil {
 				assert.Equal(t, existingId, id)
 			}
@@ -300,32 +300,32 @@ func TestStorageImpl_UnlockCreate(t *testing.T) {
 	defer clear(ctx, t, s.(storageImpl))
 	//
 	var existingId string
-	existingId, err = s.Create(ctx, "foo", model.OpEq, 3.1415926)
+	existingId, err = s.Create(ctx, "interest1", "foo", model.OpEq, 3.1415926)
 	require.Nil(t, err)
 	//
 	err = s.LockCreate(ctx, existingId) // locks for 1 minute, lock count -> 1
 	require.Nil(t, err)
 	//
-	_, err = s.Create(ctx, "foo", model.OpEq, 3.1415926)
+	_, err = s.Create(ctx, "interest1", "foo", model.OpEq, 3.1415926)
 	assert.ErrorIs(t, err, storage.ErrConflict)
 	//
 	err = s.LockCreate(ctx, existingId) // locks for 1 minute, lock count -> 2
 	require.Nil(t, err)
 	//
-	_, err = s.Create(ctx, "foo", model.OpEq, 3.1415926)
+	_, err = s.Create(ctx, "interest1", "foo", model.OpEq, 3.1415926)
 	assert.ErrorIs(t, err, storage.ErrConflict)
 	//
 	err = s.UnlockCreate(ctx, existingId) // unlocks, lock count -> 1
 	require.Nil(t, err)
 	//
-	_, err = s.Create(ctx, "foo", model.OpEq, 3.1415926)
+	_, err = s.Create(ctx, "interest1", "foo", model.OpEq, 3.1415926)
 	assert.ErrorIs(t, err, storage.ErrConflict)
 	//
 	err = s.UnlockCreate(ctx, existingId) // unlocks, lock count -> 0
 	require.Nil(t, err)
 	//
 	var id string
-	id, err = s.Create(ctx, "foo", model.OpEq, 3.1415926)
+	id, err = s.Create(ctx, "interest1", "foo", model.OpEq, 3.1415926)
 	assert.Nil(t, err)
 	assert.Equal(t, existingId, id)
 }
@@ -346,7 +346,7 @@ func TestStorageImpl_Delete(t *testing.T) {
 	require.Nil(t, err)
 	defer clear(ctx, t, s.(storageImpl))
 	//
-	id, err := s.Create(ctx, "key0", model.OpEq, 3.1415926)
+	id, err := s.Create(ctx, "interest1", "key0", model.OpEq, 3.1415926)
 	require.Nil(t, err)
 	//
 	cases := map[string]struct {
@@ -363,7 +363,7 @@ func TestStorageImpl_Delete(t *testing.T) {
 	//
 	for k, c := range cases {
 		t.Run(k, func(t *testing.T) {
-			err = s.Delete(ctx, c.id)
+			err = s.Delete(ctx, "interes1", c.id)
 			assert.ErrorIs(t, err, c.err)
 		})
 	}

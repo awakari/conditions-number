@@ -6,9 +6,9 @@ import (
 	apiGrpc "github.com/awakari/conditions-number/api/grpc"
 	"github.com/awakari/conditions-number/config"
 	"github.com/awakari/conditions-number/service"
+	"github.com/awakari/conditions-number/storage"
 	"github.com/awakari/conditions-number/storage/mongo"
-	"github.com/go-redis/cache/v9"
-	"github.com/redis/go-redis/v9"
+	"github.com/awakari/conditions-number/storage/yugabyte"
 	"log/slog"
 	"os"
 )
@@ -25,25 +25,21 @@ func main() {
 	log := slog.New(slog.NewTextHandler(os.Stdout, &opts))
 	log.Info("starting...")
 	//
-	stor, err := mongo.NewStorage(context.TODO(), cfg.Db)
+	var stor storage.Storage
+	switch cfg.Db.Type {
+	case "mongodb":
+		stor, err = mongo.NewStorage(context.TODO(), cfg.Db)
+	case "yugabyte":
+		stor, err = yugabyte.NewStorage(context.TODO(), cfg.Db)
+	default:
+		panic("unknown db type")
+	}
 	if err != nil {
 		panic(err)
 	}
 	//
 	svc := service.NewService(stor)
 	svc = service.NewServiceLogging(svc, log)
-	if cfg.Cache.Enabled {
-		cacheClient := redis.NewClient(&redis.Options{
-			Addr:     cfg.Cache.Addr,
-			Password: cfg.Cache.Password,
-		})
-		defer cacheClient.Close()
-		cacheSvc := cache.New(&cache.Options{
-			Redis:      cacheClient,
-			LocalCache: cache.NewTinyLFU(int(cfg.Cache.Local.Size), cfg.Cache.Ttl),
-		})
-		svc = service.NewCache(svc, cacheSvc, cfg.Cache.Ttl, cfg.Cache.Omit.Attributes)
-	}
 	//
 	log.Info("connected, starting to listen for incoming requests...")
 	if err = apiGrpc.Serve(svc, cfg.Api.Port); err != nil {

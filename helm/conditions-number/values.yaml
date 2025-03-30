@@ -61,14 +61,14 @@ resources:
     memory: 16Mi
   limits:
     cpu: 1000m
-    memory: 128Mi
+    memory: 64Mi
 
 autoscaling:
   enabled: true
   minReplicas: 1
   maxReplicas: 2
   targetCPUUtilizationValue: 500m
-  targetMemoryUtilizationValue: 128Mi
+  targetMemoryUtilizationValue: 56Mi
   targetResolverWorkQueueLength: 100
 
 priority:
@@ -107,11 +107,3 @@ resolver:
   queue:
     name: "resolver"
     targetLength: 1000
-cache:
-  enabled: false
-  local:
-    size: "10000"
-  ttl: "1h"
-  addr: "cache-keydb:6379"
-  omit:
-    attributes: "awkpubtime,datemodified,datepublished,enddate,ends,nonce,published,revision,sequence,startdate,tgfileid,tgfileuniqueid,time,tradeid,updated,xblockindex,xprevblockindex"

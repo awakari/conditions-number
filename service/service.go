@@ -7,10 +7,10 @@ import (
 )
 
 type Service interface {
-	Create(ctx context.Context, k string, o model.Op, v float64) (id string, err error)
+	Create(ctx context.Context, interestId, k string, o model.Op, v float64) (id string, err error)
 	LockCreate(ctx context.Context, id string) (err error)
 	UnlockCreate(ctx context.Context, id string) (err error)
-	Delete(ctx context.Context, id string) (err error)
+	Delete(ctx context.Context, interestId, id string) (err error)
 	SearchPage(ctx context.Context, key string, val float64, limit uint32, cursor string) (ids []string, err error)
 }
 
@@ -24,8 +24,8 @@ func NewService(stor storage.Storage) Service {
 	}
 }
 
-func (svc service) Create(ctx context.Context, k string, o model.Op, v float64) (id string, err error) {
-	id, err = svc.stor.Create(ctx, k, o, v)
+func (svc service) Create(ctx context.Context, interestId, k string, o model.Op, v float64) (id string, err error) {
+	id, err = svc.stor.Create(ctx, interestId, k, o, v)
 	return
 }
 
@@ -37,8 +37,8 @@ func (svc service) UnlockCreate(ctx context.Context, id string) (err error) {
 	return svc.stor.UnlockCreate(ctx, id)
 }
 
-func (svc service) Delete(ctx context.Context, id string) (err error) {
-	return svc.stor.Delete(ctx, id)
+func (svc service) Delete(ctx context.Context, interestId, id string) (err error) {
+	return svc.stor.Delete(ctx, interestId, id)
 }
 
 func (svc service) SearchPage(ctx context.Context, key string, val float64, limit uint32, cursor string) (ids []string, err error) {

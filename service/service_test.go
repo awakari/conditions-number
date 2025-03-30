@@ -34,7 +34,7 @@ func TestService_Create(t *testing.T) {
 	//
 	for k, c := range cases {
 		t.Run(k, func(t *testing.T) {
-			id, err := svc.Create(context.TODO(), c.key, model.OpEq, c.val)
+			id, err := svc.Create(context.TODO(), "interest1", c.key, model.OpEq, c.val)
 			if c.err == nil {
 				assert.Equal(t, "cond0", id)
 			}
@@ -87,7 +87,7 @@ func TestService_Delete(t *testing.T) {
 	//
 	for k, c := range cases {
 		t.Run(k, func(t *testing.T) {
-			err := svc.Delete(context.TODO(), c.id)
+			err := svc.Delete(context.TODO(), "interest1", c.id)
 			assert.ErrorIs(t, err, c.err)
 		})
 	}

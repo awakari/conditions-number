@@ -147,7 +147,7 @@ func (s storageImpl) Close() error {
 	return s.conn.Disconnect(context.TODO())
 }
 
-func (s storageImpl) Create(ctx context.Context, k string, o model.Op, v float64) (id string, err error) {
+func (s storageImpl) Create(ctx context.Context, _, k string, o model.Op, v float64) (id string, err error) {
 	maxLockTime := time.Now().UTC().Add(-s.createLockTtl)
 	clauseCreateLockExpired := bson.M{
 		attrCreateLockTime: bson.M{
@@ -225,7 +225,7 @@ func (s storageImpl) UnlockCreate(ctx context.Context, id string) (err error) {
 	return
 }
 
-func (s storageImpl) Delete(ctx context.Context, id string) (err error) {
+func (s storageImpl) Delete(ctx context.Context, _, id string) (err error) {
 	var oid primitive.ObjectID
 	oid, err = primitive.ObjectIDFromHex(id)
 	if err == nil {

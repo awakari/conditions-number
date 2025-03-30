@@ -33,6 +33,13 @@ spec:
           env:
             - name: API_PORT
               value: "{{ .Values.service.port }}"
+            - name: DB_TYPE
+              value: "{{ .Values.db.type }}"
+            - name: DB_HOST
+              value: "{{ .Values.db.host }}"
+            - name: DB_PORT
+              value: "{{ .Values.db.port }}"
+            {{- if .Values.db.secret.enabled }}
             - name: DB_URI
               valueFrom:
                 secretKeyRef:
@@ -48,6 +55,12 @@ spec:
                 secretKeyRef:
                   name: "{{ .Values.db.secret.name }}"
                   key: "{{ .Values.db.secret.keys.password }}"
+            {{- else }}
+            - name: DB_USERNAME
+              value: "{{ .Values.db.username }}"
+            - name: DB_PASSWORD
+              value: "{{ .Values.db.password }}"
+            {{- end }}
             - name: DB_NAME
               value: {{ .Values.db.name }}
             - name: DB_TABLE_NAME
@@ -62,18 +75,6 @@ spec:
               value: "{{ .Values.db.tls.insecure }}"
             - name: LOG_LEVEL
               value: "{{ .Values.log.level }}"
-            - name: CACHE_LOCAL_SIZE
-              value: "{{ .Values.cache.local.size }}"
-            - name: CACHE_TTL
-              value: "{{ .Values.cache.ttl }}"
-            - name: CACHE_ADDR
-              value: "{{ .Values.cache.addr }}"
-            - name: CACHE_PASSWORD
-              value: "{{ .Values.cache.password }}"
-            - name: CACHE_ENABLED
-              value: "{{ .Values.cache.enabled }}"
-            - name: CACHE_OMIT_ATTRIBUTES
-              value: "{{ .Values.cache.omit.attributes }}"
           securityContext:
             {{- toYaml .Values.securityContext | nindent 12 }}
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"

@@ -19,10 +19,10 @@ func NewServiceLogging(svc Service, log *slog.Logger) Service {
 	}
 }
 
-func (sl serviceLogging) Create(ctx context.Context, k string, o model.Op, v float64) (id string, err error) {
-	id, err = sl.svc.Create(ctx, k, o, v)
+func (sl serviceLogging) Create(ctx context.Context, interestId, k string, o model.Op, v float64) (id string, err error) {
+	id, err = sl.svc.Create(ctx, interestId, k, o, v)
 	ll := sl.logLevel(err)
-	sl.log.Log(ctx, ll, fmt.Sprintf("Create(k=%s, o=%s, v=%f): id=%s, err=%s", k, o, v, id, err))
+	sl.log.Log(ctx, ll, fmt.Sprintf("Create(interest=%s, k=%s, o=%s, v=%f): id=%s, err=%s", interestId, k, o, v, id, err))
 	return
 }
 
@@ -40,10 +40,10 @@ func (sl serviceLogging) UnlockCreate(ctx context.Context, id string) (err error
 	return
 }
 
-func (sl serviceLogging) Delete(ctx context.Context, id string) (err error) {
-	err = sl.svc.Delete(ctx, id)
+func (sl serviceLogging) Delete(ctx context.Context, interestId, id string) (err error) {
+	err = sl.svc.Delete(ctx, interestId, id)
 	ll := sl.logLevel(err)
-	sl.log.Log(ctx, ll, fmt.Sprintf("Delete(id=%s): err=%s", id, err))
+	sl.log.Log(ctx, ll, fmt.Sprintf("Delete(interest=%s, id=%s): err=%s", interestId, id, err))
 	return
 }
 

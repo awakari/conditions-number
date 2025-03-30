@@ -37,7 +37,7 @@ func (c controller) Create(ctx context.Context, req *CreateRequest) (resp *Creat
 	default:
 		op = model.OpUndefined
 	}
-	resp.Id, err = c.svc.Create(ctx, req.Key, op, req.Val)
+	resp.Id, err = c.svc.Create(ctx, req.InterestId, req.Key, op, req.Val)
 	err = encodeError(err)
 	return
 }
@@ -58,7 +58,7 @@ func (c controller) UnlockCreate(ctx context.Context, req *UnlockCreateRequest) 
 
 func (c controller) Delete(ctx context.Context, req *DeleteRequest) (resp *DeleteResponse, err error) {
 	resp = &DeleteResponse{}
-	err = c.svc.Delete(ctx, req.Id)
+	err = c.svc.Delete(ctx, req.InterestId, req.Id)
 	err = encodeError(err)
 	return
 }

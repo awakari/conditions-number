@@ -21,6 +21,7 @@ message CreateRequest {
   string key = 1;
   Operation op = 2;
   double val = 3;
+  string interestId = 4;
 }
 
 enum Operation {
@@ -52,6 +53,7 @@ message UnlockCreateResponse {
 
 message DeleteRequest {
   string id = 1;
+  string interestId = 2;
 }
 
 message DeleteResponse {

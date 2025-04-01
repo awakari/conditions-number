@@ -24,13 +24,13 @@ func TestNewStorage(t *testing.T) {
 		t.Skip()
 	}
 
-	tblName := fmt.Sprintf("conditions_text_test_%d", time.Now().UnixMicro())
+	tblName := fmt.Sprintf("conditions_number_test_%d", time.Now().UnixMicro())
 	ctx, cancel := context.WithTimeout(context.Background(), 15*time.Minute)
 	defer cancel()
 	cfgDb := config.DbConfig{
 		Host:     "localhost",
 		Port:     5433,
-		Name:     "conditions_text",
+		Name:     "conditions_number",
 		UserName: "yugabyte",
 		Password: "yugabyte",
 	}
@@ -59,13 +59,13 @@ func TestStorageImpl_SearchPage(t *testing.T) {
 		t.Skip()
 	}
 
-	tblName := fmt.Sprintf("conditions_text_test_%d", time.Now().UnixMicro())
+	tblName := fmt.Sprintf("conditions_number_test_%d", time.Now().UnixMicro())
 	ctx, cancel := context.WithTimeout(context.Background(), 15*time.Minute)
 	defer cancel()
 	cfgDb := config.DbConfig{
 		Host:     "localhost",
 		Port:     5433,
-		Name:     "conditions_text",
+		Name:     "conditions_number",
 		UserName: "yugabyte",
 		Password: "yugabyte",
 	}
@@ -175,13 +175,13 @@ func TestStorageImpl_Create(t *testing.T) {
 		t.Skip()
 	}
 
-	tblName := fmt.Sprintf("conditions_text_test_%d", time.Now().UnixMicro())
+	tblName := fmt.Sprintf("conditions_number_test_%d", time.Now().UnixMicro())
 	ctx, cancel := context.WithTimeout(context.Background(), 15*time.Minute)
 	defer cancel()
 	cfgDb := config.DbConfig{
 		Host:     "localhost",
 		Port:     5433,
-		Name:     "conditions_text",
+		Name:     "conditions_number",
 		UserName: "yugabyte",
 		Password: "yugabyte",
 	}
@@ -246,13 +246,13 @@ func TestStorageImpl_Delete(t *testing.T) {
 		t.Skip()
 	}
 
-	tblName := fmt.Sprintf("conditions_text_test_%d", time.Now().UnixMicro())
+	tblName := fmt.Sprintf("conditions_number_test_%d", time.Now().UnixMicro())
 	ctx, cancel := context.WithTimeout(context.Background(), 15*time.Minute)
 	defer cancel()
 	cfgDb := config.DbConfig{
 		Host:     "localhost",
 		Port:     5433,
-		Name:     "conditions_text",
+		Name:     "conditions_number",
 		UserName: "yugabyte",
 		Password: "yugabyte",
 	}

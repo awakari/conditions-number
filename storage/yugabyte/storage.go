@@ -186,6 +186,175 @@ func (s stor) Delete(ctx context.Context, interestId, id string) (err error) {
 
 func (s stor) SearchPage(ctx context.Context, key string, val float64, limit uint32, cursor string) (ids []string, err error) {
 
+	query := fmt.Sprintf(
+
+		`
+        (
+			SELECT %s 
+			FROM %s
+			WHERE 
+				%s > $1 
+				AND %s = ''
+				AND %s = %d 
+				AND %s < $3
+		)
+		UNION ALL (
+			SELECT %s 
+			FROM %s
+			WHERE 
+				%s > $1 
+				AND %s = $2
+				AND %s = %d 
+				AND %s < $3
+		)
+        UNION ALL (
+			SELECT %s 
+			FROM %s
+			WHERE 
+				%s > $1 
+				AND %s = ''
+				AND %s = %d 
+				AND %s <= $3
+		)
+		UNION ALL (
+			SELECT %s 
+			FROM %s
+			WHERE 
+				%s > $1 
+				AND %s = $2
+				AND %s = %d 
+				AND %s <= $3
+		)
+        UNION ALL (
+			SELECT %s 
+			FROM %s
+			WHERE 
+				%s > $1 
+				AND %s = ''
+				AND %s = %d 
+				AND %s = $3
+		)
+		UNION ALL (
+			SELECT %s 
+			FROM %s
+			WHERE 
+				%s > $1 
+				AND %s = $2
+				AND %s = %d 
+				AND %s = $3
+		)
+        UNION ALL (
+			SELECT %s 
+			FROM %s
+			WHERE 
+				%s > $1 
+				AND %s = ''
+				AND %s = %d 
+				AND %s >= $3
+		)
+		UNION ALL (
+			SELECT %s 
+			FROM %s
+			WHERE 
+				%s > $1 
+				AND %s = $2
+				AND %s = %d 
+				AND %s >= $3
+		)
+        UNION ALL (
+			SELECT %s 
+			FROM %s
+			WHERE 
+				%s > $1 
+				AND %s = ''
+				AND %s = %d 
+				AND %s > $3
+		)
+		UNION ALL (
+			SELECT %s 
+			FROM %s
+			WHERE 
+				%s > $1 
+				AND %s = $2
+				AND %s = %d 
+				AND %s > $3
+		)
+		ORDER BY %s ASC
+        LIMIT $4`,
+
+		colExternalId,
+		s.tblName,
+		colExternalId,
+		colKey,
+		colOperation, model.OpGt,
+		colVal,
+
+		colExternalId,
+		s.tblName,
+		colExternalId,
+		colKey,
+		colOperation, model.OpGt,
+		colVal,
+
+		colExternalId,
+		s.tblName,
+		colExternalId,
+		colKey,
+		colOperation, model.OpGte,
+		colVal,
+
+		colExternalId,
+		s.tblName,
+		colExternalId,
+		colKey,
+		colOperation, model.OpGte,
+		colVal,
+
+		colExternalId,
+		s.tblName,
+		colExternalId,
+		colKey,
+		colOperation, model.OpEq,
+		colVal,
+
+		colExternalId,
+		s.tblName,
+		colExternalId,
+		colKey,
+		colOperation, model.OpEq,
+		colVal,
+
+		colExternalId,
+		s.tblName,
+		colExternalId,
+		colKey,
+		colOperation, model.OpLte,
+		colVal,
+
+		colExternalId,
+		s.tblName,
+		colExternalId,
+		colKey,
+		colOperation, model.OpLte,
+		colVal,
+
+		colExternalId,
+		s.tblName,
+		colExternalId,
+		colKey,
+		colOperation, model.OpLt,
+		colVal,
+
+		colExternalId,
+		s.tblName,
+		colExternalId,
+		colKey,
+		colOperation, model.OpLt,
+		colVal,
+
+		colExternalId,
+	)
+
 	var cursorId int64
 	if cursor != "" {
 		cursorId, err = strconv.ParseInt(cursor, idRadix, 64)
@@ -193,36 +362,6 @@ func (s stor) SearchPage(ctx context.Context, key string, val float64, limit uin
 			return nil, fmt.Errorf("failed to parse cursor %s: %w", cursor, err)
 		}
 	}
-
-	query := fmt.Sprintf(
-		`
-        SELECT %s 
-        FROM %s
-        WHERE 
-            %s > $1 
-        	AND (
-                %s = '' 
-                OR %s = $2
-            )
-            AND (
-                %s = %d AND %s < $3                
-                OR %s = %d AND %s <= $3
-                OR %s = %d AND %s = $3
-                OR %s = %d AND %s >= $3
-                OR %s = %d AND %s > $3
-            )
-        LIMIT $4`,
-		colExternalId,
-		s.tblName,
-		colExternalId,
-		colKey,
-		colKey,
-		colOperation, model.OpGt, colVal,
-		colOperation, model.OpGte, colVal,
-		colOperation, model.OpEq, colVal,
-		colOperation, model.OpLte, colVal,
-		colOperation, model.OpLt, colVal,
-	)
 
 	rows, err := s.connPool.Query(ctx, query, cursorId, key, val, limit)
 	if err != nil {

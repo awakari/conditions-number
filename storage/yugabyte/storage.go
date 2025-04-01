@@ -187,171 +187,34 @@ func (s stor) Delete(ctx context.Context, interestId, id string) (err error) {
 func (s stor) SearchPage(ctx context.Context, key string, val float64, limit uint32, cursor string) (ids []string, err error) {
 
 	query := fmt.Sprintf(
-
 		`
-        (
-			SELECT %s 
-			FROM %s
-			WHERE 
-				%s > $1 
-				AND %s = ''
-				AND %s = %d 
-				AND %s < $3
-		)
-		UNION ALL (
-			SELECT %s 
-			FROM %s
-			WHERE 
-				%s > $1 
-				AND %s = $2
-				AND %s = %d 
-				AND %s < $3
-		)
-        UNION ALL (
-			SELECT %s 
-			FROM %s
-			WHERE 
-				%s > $1 
-				AND %s = ''
-				AND %s = %d 
-				AND %s <= $3
-		)
-		UNION ALL (
-			SELECT %s 
-			FROM %s
-			WHERE 
-				%s > $1 
-				AND %s = $2
-				AND %s = %d 
-				AND %s <= $3
-		)
-        UNION ALL (
-			SELECT %s 
-			FROM %s
-			WHERE 
-				%s > $1 
-				AND %s = ''
-				AND %s = %d 
-				AND %s = $3
-		)
-		UNION ALL (
-			SELECT %s 
-			FROM %s
-			WHERE 
-				%s > $1 
-				AND %s = $2
-				AND %s = %d 
-				AND %s = $3
-		)
-        UNION ALL (
-			SELECT %s 
-			FROM %s
-			WHERE 
-				%s > $1 
-				AND %s = ''
-				AND %s = %d 
-				AND %s >= $3
-		)
-		UNION ALL (
-			SELECT %s 
-			FROM %s
-			WHERE 
-				%s > $1 
-				AND %s = $2
-				AND %s = %d 
-				AND %s >= $3
-		)
-        UNION ALL (
-			SELECT %s 
-			FROM %s
-			WHERE 
-				%s > $1 
-				AND %s = ''
-				AND %s = %d 
-				AND %s > $3
-		)
-		UNION ALL (
-			SELECT %s 
-			FROM %s
-			WHERE 
-				%s > $1 
-				AND %s = $2
-				AND %s = %d 
-				AND %s > $3
-		)
-		ORDER BY %s ASC
+        SELECT %s 
+        FROM %s
+        WHERE 
+            %s > $1 
+        	AND (
+                %s = '' 
+                OR %s = $2
+            )
+            AND (
+                %s = %d AND %s < $3                
+                OR %s = %d AND %s <= $3
+                OR %s = %d AND %s = $3
+                OR %s = %d AND %s >= $3
+                OR %s = %d AND %s > $3
+            )
+        ORDER BY %s ASC
         LIMIT $4`,
-
 		colExternalId,
 		s.tblName,
 		colExternalId,
 		colKey,
-		colOperation, model.OpGt,
-		colVal,
-
-		colExternalId,
-		s.tblName,
-		colExternalId,
 		colKey,
-		colOperation, model.OpGt,
-		colVal,
-
-		colExternalId,
-		s.tblName,
-		colExternalId,
-		colKey,
-		colOperation, model.OpGte,
-		colVal,
-
-		colExternalId,
-		s.tblName,
-		colExternalId,
-		colKey,
-		colOperation, model.OpGte,
-		colVal,
-
-		colExternalId,
-		s.tblName,
-		colExternalId,
-		colKey,
-		colOperation, model.OpEq,
-		colVal,
-
-		colExternalId,
-		s.tblName,
-		colExternalId,
-		colKey,
-		colOperation, model.OpEq,
-		colVal,
-
-		colExternalId,
-		s.tblName,
-		colExternalId,
-		colKey,
-		colOperation, model.OpLte,
-		colVal,
-
-		colExternalId,
-		s.tblName,
-		colExternalId,
-		colKey,
-		colOperation, model.OpLte,
-		colVal,
-
-		colExternalId,
-		s.tblName,
-		colExternalId,
-		colKey,
-		colOperation, model.OpLt,
-		colVal,
-
-		colExternalId,
-		s.tblName,
-		colExternalId,
-		colKey,
-		colOperation, model.OpLt,
-		colVal,
-
+		colOperation, model.OpGt, colVal,
+		colOperation, model.OpGte, colVal,
+		colOperation, model.OpEq, colVal,
+		colOperation, model.OpLte, colVal,
+		colOperation, model.OpLt, colVal,
 		colExternalId,
 	)
 

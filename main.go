@@ -7,7 +7,7 @@ import (
 	"github.com/awakari/conditions-number/config"
 	"github.com/awakari/conditions-number/service"
 	"github.com/awakari/conditions-number/storage"
-	"github.com/awakari/conditions-number/storage/yugabyte"
+	"github.com/awakari/conditions-number/storage/mongo"
 	"log/slog"
 	"os"
 )
@@ -26,8 +26,8 @@ func main() {
 	//
 	var stor storage.Storage
 	switch cfg.Db.Type {
-	case "yugabyte":
-		stor, err = yugabyte.NewStorage(context.TODO(), cfg.Db)
+	case "mongo":
+		stor, err = mongo.NewStorage(context.TODO(), cfg.Db)
 	default:
 		panic("unknown db type")
 	}

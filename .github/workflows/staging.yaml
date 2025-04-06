@@ -61,13 +61,7 @@ jobs:
             --region ${{ secrets.GKE_CLUSTER_REGION }} \
             --project ${{ secrets.GKE_PROJECT_ID }}
 
-#      - name: Helm Upgrade
-#        run: |
-#          helm upgrade --install ${COMPONENT} helm/package/${COMPONENT}-0.0.0.tgz \
-#            --set-string podAnnotations.commit=$(git rev-parse --short HEAD)
-#
-      - name: Helm Upgrade Yugabate version
+      - name: Helm Upgrade
         run: |
-          helm upgrade --install ${COMPONENT}-yb helm/package/${COMPONENT}-0.0.0.tgz \
-            --set-string podAnnotations.commit=$(git rev-parse --short HEAD) \
-            --values helm/${COMPONENT}/values-yugabyte.yaml
+          helm upgrade --install ${COMPONENT} helm/package/${COMPONENT}-0.0.0.tgz \
+            --set-string podAnnotations.commit=$(git rev-parse --short HEAD)

@@ -78,7 +78,18 @@ nodeSelector: {}
 
 tolerations: []
 
-affinity: {}
+affinity:
+  podAntiAffinity:
+    preferredDuringSchedulingIgnoredDuringExecution:
+      - weight: 1
+        podAffinityTerm:
+          labelSelector:
+            matchExpressions:
+              - key: app.kubernetes.io/name
+                operator: In
+                values:
+                  - embed-text
+          topologyKey: "kubernetes.io/hostname"
 
 # Database related configuration.
 db:
@@ -109,4 +120,4 @@ resolver:
   name: "resolver"
   queue:
     name: "resolver"
-    targetLength: 1000
+    targetLength: 100

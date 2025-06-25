@@ -89,6 +89,7 @@ affinity:
                 operator: In
                 values:
                   - embed-text
+                  - conditions-number
           topologyKey: "kubernetes.io/hostname"
 
 # Database related configuration.

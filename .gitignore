@@ -19,3 +19,4 @@ vendor/
 
 helm/conditions-number/values-dev.yaml
 ghcr_io_pat.txt
+backup

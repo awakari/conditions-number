@@ -1,0 +1,14 @@
+affinity: {}
+
+autoscaling:
+  enabled: false
+
+image:
+  repository: ghcr.io/awakari/conditions-number-arm64
+
+service:
+  type: LoadBalancer
+  port: 50057
+
+priority:
+  class: ""

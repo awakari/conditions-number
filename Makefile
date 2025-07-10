@@ -34,7 +34,7 @@ docker:
 	docker build -t awakari/conditions-number .
 
 docker-arm:
-	docker build -t awakari/conditions-semantic . -f arm.Dockerfile
+	docker build -t awakari/conditions-number . -f arm.Dockerfile
 
 run: docker
 	docker run \

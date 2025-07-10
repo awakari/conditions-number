@@ -57,4 +57,4 @@ jobs:
         run: |
           helm upgrade --install ${COMPONENT} helm/package/${COMPONENT}-0.0.0.tgz \
             --set-string podAnnotations.commit=$(git rev-parse --short HEAD) \
-            --values helm/values-arm.yaml
+            --values helm/${COMPONENT}/values-arm.yaml
